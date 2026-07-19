@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }} — Biblioteca Universitaria{% endblock %}
+{% block content %}
+<h2 class="mb-4">{{ titulo }}</h2>
+
+<div class="card" style="max-width: 600px;">
+  <div class="card-body">
+    <p>¿Está seguro de que desea eliminar <strong>{{ descripcion|default:object }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Eliminar</button>
+      <a href="{% url url_cancelar %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

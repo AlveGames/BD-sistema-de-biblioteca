@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Préstamos — Biblioteca Universitaria{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-journal-bookmark"></i> Préstamos</h2>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card mb-4">
+  <div class="card-header">Registrar nuevo préstamo</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="usuario" class="form-label">Usuario</label>
+          <select name="usuario" id="usuario" class="form-select" required>
+            <option value="" disabled selected>Seleccione un usuario</option>
+            {% for usuario in usuarios %}
+              <option value="{{ usuario.id_usuario }}">{{ usuario.nombres }} {{ usuario.apellidos }} ({{ usuario.dni }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="bibliotecario" class="form-label">Bibliotecario</label>
+          <select name="bibliotecario" id="bibliotecario" class="form-select" required>
+            <option value="" disabled selected>Seleccione un bibliotecario</option>
+            {% for bibliotecario in bibliotecarios %}
+              <option value="{{ bibliotecario.id_bibliotecario }}">{{ bibliotecario.nombre }} {{ bibliotecario.apellido }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Ejemplares disponibles</label>
+          <div class="border rounded p-3" style="max-height: 260px; overflow-y: auto;">
+            {% for ejemplar in ejemplares_disponibles %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="ejemplares" value="{{ ejemplar.id_ejemplar }}" id="ejemplar-{{ ejemplar.id_ejemplar }}">
+                <label class="form-check-label" for="ejemplar-{{ ejemplar.id_ejemplar }}">
+                  {{ ejemplar.id_libro.titulo_libro }} — serie {{ ejemplar.numero_serie }}
+                </label>
+              </div>
+            {% empty %}
+              <p class="text-muted mb-0">No hay ejemplares disponibles actualmente.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-3">
+        <i class="bi bi-plus-circle"></i> Registrar préstamo
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Préstamos activos</div>
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Usuario</th>
+          <th>Bibliotecario</th>
+          <th>Fecha préstamo</th>
+          <th>Devolución esperada</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prestamo in prestamos_activos %}
+          <tr>
+            <td>{{ prestamo.id_prestamo }}</td>
+            <td>{{ prestamo.id_usuario.nombres }} {{ prestamo.id_usuario.apellidos }}</td>
+            <td>{{ prestamo.id_bibliotecario.nombre }} {{ prestamo.id_bibliotecario.apellido }}</td>
+            <td>{{ prestamo.fecha_prestamo }}</td>
+            <td>{{ prestamo.fecha_devolucion_esperada }}</td>
+            <td><span class="badge bg-success">{{ prestamo.id_estado.codigo }}</span></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">No hay préstamos activos.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

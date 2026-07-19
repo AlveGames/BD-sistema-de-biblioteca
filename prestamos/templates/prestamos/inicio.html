@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Inicio — Biblioteca Universitaria{% endblock %}
+{% block content %}
+<h2 class="mb-4">Panel de control — Biblioteca UNEMI</h2>
+
+{% if multas_pendientes.cantidad > 0 %}
+  <div class="alert alert-warning" role="alert">
+    <i class="bi bi-exclamation-triangle"></i>
+    Hay {{ multas_pendientes.cantidad }} multas pendientes por un total de ${{ multas_pendientes.total }}
+  </div>
+{% endif %}
+
+<div class="row row-cols-1 row-cols-md-4 g-3 mb-4">
+  <div class="col">
+    <div class="card h-100" style="border-left: 4px solid var(--accent);">
+      <div class="card-body">
+        <div class="text-muted small"><i class="bi bi-journal-bookmark"></i> Préstamos activos</div>
+        <div class="fs-2 fw-bold">{{ prestamos_activos }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100" style="border-left: 4px solid var(--accent);">
+      <div class="card-body">
+        <div class="text-muted small"><i class="bi bi-calendar-check"></i> Reservas activas</div>
+        <div class="fs-2 fw-bold">{{ reservas_activas }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100" style="border-left: 4px solid var(--accent);">
+      <div class="card-body">
+        <div class="text-muted small"><i class="bi bi-cash-coin"></i> Multas pendientes</div>
+        <div class="fs-2 fw-bold">{{ multas_pendientes.cantidad }}</div>
+        <div class="text-muted small">${{ multas_pendientes.total }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100" style="border-left: 4px solid var(--accent);">
+      <div class="card-body">
+        <div class="text-muted small"><i class="bi bi-collection"></i> Ejemplares disponibles</div>
+        <div class="fs-2 fw-bold">{{ ejemplares_disponibles }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex gap-2">
+  <a href="{% url 'prestamos:lista' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Registrar Préstamo</a>
+  <a href="{% url 'reservas:lista' %}" class="btn btn-outline-primary"><i class="bi bi-plus-circle"></i> Nueva Reserva</a>
+  <a href="{% url 'multas:lista' %}" class="btn btn-outline-primary"><i class="bi bi-cash-coin"></i> Cobrar Multa</a>
+</div>
+{% endblock %}

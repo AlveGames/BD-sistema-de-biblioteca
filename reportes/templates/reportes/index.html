@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Reportes — Biblioteca Universitaria{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-bar-chart"></i> Reportes y Consultas</h2>
+
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'prestamos' %}active{% endif %}" href="?tab=prestamos">Préstamos por Período</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'libros' %}active{% endif %}" href="?tab=libros">Libros Más Prestados</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'multas' %}active{% endif %}" href="?tab=multas">Usuarios con Multas Pendientes</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'categorias' %}active{% endif %}" href="?tab=categorias">Ejemplares Disponibles por Categoría</a>
+  </li>
+</ul>
+
+{% if tab == 'prestamos' %}
+  <div class="btn-group mb-3" role="group">
+    <a href="?tab=prestamos&agrupacion=dia" class="btn btn-outline-primary {% if agrupacion == 'dia' %}active{% endif %}">Día</a>
+    <a href="?tab=prestamos&agrupacion=semana" class="btn btn-outline-primary {% if agrupacion == 'semana' %}active{% endif %}">Semana</a>
+    <a href="?tab=prestamos&agrupacion=mes" class="btn btn-outline-primary {% if agrupacion == 'mes' %}active{% endif %}">Mes</a>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Período</th>
+            <th>Total de préstamos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in prestamos_periodo %}
+            <tr>
+              <td>{{ fila.periodo }}</td>
+              <td>{{ fila.total_prestamos }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="2" class="text-center text-muted">Sin datos.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% elif tab == 'libros' %}
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Libro</th>
+            <th>Veces prestado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in libros_mas_prestados %}
+            <tr>
+              <td>{{ fila.id_ejemplar__id_libro__titulo_libro }}</td>
+              <td>{{ fila.veces_prestado }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="2" class="text-center text-muted">Sin datos.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% elif tab == 'multas' %}
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Cantidad de multas</th>
+            <th>Monto total adeudado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in usuarios_multas %}
+            <tr>
+              <td>
+                {{ fila.id_devolucion__id_detalle__id_prestamo__id_usuario__nombres }}
+                {{ fila.id_devolucion__id_detalle__id_prestamo__id_usuario__apellidos }}
+              </td>
+              <td>{{ fila.cantidad_multas }}</td>
+              <td>${{ fila.monto_total }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-muted">Sin datos.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% elif tab == 'categorias' %}
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Ejemplares disponibles</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in ejemplares_categoria %}
+            <tr>
+              <td>{{ fila.id_libro__id_categoria__nombre }}</td>
+              <td>{{ fila.total_disponibles }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="2" class="text-center text-muted">Sin datos.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

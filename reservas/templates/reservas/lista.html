@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Reservas — Biblioteca Universitaria{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-calendar-check"></i> Reservas</h2>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card mb-4">
+  <div class="card-header">Registrar nueva reserva</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="usuario" class="form-label">Usuario</label>
+          <select name="usuario" id="usuario" class="form-select" required>
+            <option value="" disabled selected>Seleccione un usuario</option>
+            {% for usuario in usuarios %}
+              <option value="{{ usuario.id_usuario }}">{{ usuario.nombres }} {{ usuario.apellidos }} ({{ usuario.dni }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="libro" class="form-label">Libro</label>
+          <select name="libro" id="libro" class="form-select" required>
+            <option value="" disabled selected>Seleccione un libro</option>
+            {% for libro in libros %}
+              <option value="{{ libro.id_libro }}">{{ libro.titulo_libro }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-3">
+        <i class="bi bi-plus-circle"></i> Registrar reserva
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Reservas activas</div>
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Usuario</th>
+          <th>Libro</th>
+          <th>Fecha reserva</th>
+          <th>Vence (48h)</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reserva in reservas_activas %}
+          <tr>
+            <td>{{ reserva.id_reserva }}</td>
+            <td>{{ reserva.id_usuario.nombres }} {{ reserva.id_usuario.apellidos }}</td>
+            <td>{{ reserva.id_libro.titulo_libro }}</td>
+            <td>{{ reserva.fecha_reserva }}</td>
+            <td>{{ reserva.fecha_vencimiento }}</td>
+            <td>
+              {% if reserva.estado_calculado == 'activa' %}
+                <span class="badge bg-success">activa</span>
+              {% else %}
+                <span class="badge bg-secondary">vencida</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">No hay reservas activas.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

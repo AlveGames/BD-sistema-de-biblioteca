@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Multas — Biblioteca Universitaria{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-cash-coin"></i> Multas</h2>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card mb-4">
+  <div class="card-header">Registrar pago de multa</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="multa" class="form-label">Multa pendiente</label>
+          <select name="multa" id="multa" class="form-select" required>
+            <option value="" disabled selected>Seleccione una multa</option>
+            {% for multa in multas_pendientes %}
+              <option value="{{ multa.id_multa }}">
+                #{{ multa.id_multa }} — {{ multa.id_devolucion.id_detalle.id_prestamo.id_usuario.nombres }}
+                {{ multa.id_devolucion.id_detalle.id_prestamo.id_usuario.apellidos }} — ${{ multa.monto }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="monto_pagado" class="form-label">Monto pagado</label>
+          <input type="number" step="0.01" min="0.01" name="monto_pagado" id="monto_pagado" class="form-control" required>
+        </div>
+
+        <div class="col-md-6">
+          <label for="metodo_pago" class="form-label">Método de pago</label>
+          <select name="metodo_pago" id="metodo_pago" class="form-select" required>
+            <option value="" disabled selected>Seleccione un método</option>
+            {% for metodo in metodos_pago %}
+              <option value="{{ metodo.id_metodo_pago }}">{{ metodo.descripcion }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="bibliotecario" class="form-label">Bibliotecario</label>
+          <select name="bibliotecario" id="bibliotecario" class="form-select" required>
+            <option value="" disabled selected>Seleccione un bibliotecario</option>
+            {% for bibliotecario in bibliotecarios %}
+              <option value="{{ bibliotecario.id_bibliotecario }}">{{ bibliotecario.nombre }} {{ bibliotecario.apellido }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-3">
+        <i class="bi bi-check-circle"></i> Registrar pago
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Multas pendientes</div>
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Usuario</th>
+          <th>Tipo</th>
+          <th>Días de atraso</th>
+          <th>Monto</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for multa in multas_pendientes %}
+          <tr>
+            <td>{{ multa.id_multa }}</td>
+            <td>
+              {{ multa.id_devolucion.id_detalle.id_prestamo.id_usuario.nombres }}
+              {{ multa.id_devolucion.id_detalle.id_prestamo.id_usuario.apellidos }}
+            </td>
+            <td>{{ multa.id_tipo_multa.descripcion }}</td>
+            <td>{{ multa.id_devolucion.dias_atraso }}</td>
+            <td>${{ multa.monto }}</td>
+            <td><span class="badge bg-warning text-dark">{{ multa.id_estado.codigo }}</span></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">No hay multas pendientes.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
