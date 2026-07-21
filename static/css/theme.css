@@ -1,19 +1,27 @@
 :root {
-    --bg-primary: #F5F5F5;
-    --bg-sidebar: #1A1A2E;
-    --accent: #4A00E0;
+    --morado: #4A00E0;
+    --morado-claro: #7B2FE0;
+    --negro: #0D0D0D;
+    --gris: #2D2D2D;
+    --fondo: #F5F5F5;
+
+    /* alias retrocompatibles usados por el layout base */
+    --bg-primary: var(--fondo);
+    --bg-sidebar: var(--negro);
+    --accent: var(--morado);
     --text-light: #FFFFFF;
-    --text-muted: rgba(255,255,255,0.6);
+    --text-muted: rgba(255, 255, 255, 0.6);
 }
 
 body {
-    background-color: var(--bg-primary);
+    background-color: var(--fondo);
     margin: 0;
     display: flex;
 }
 
+/* Sidebar */
 .sidebar {
-    background-color: var(--bg-sidebar);
+    background-color: var(--negro);
     width: 240px;
     height: 100vh;
     position: fixed;
@@ -41,14 +49,15 @@ body {
     font-size: 0.95rem;
 }
 
-.sidebar-link:hover, .sidebar-link.active {
-    background-color: var(--accent);
+.sidebar-link.active,
+.sidebar-link:hover {
+    background-color: var(--morado);
     color: #FFFFFF;
 }
 
 .sidebar-footer {
     padding: 15px 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-footer-link {
@@ -62,3 +71,77 @@ body {
     padding: 30px;
     width: 100%;
 }
+
+/* Botones principales (Bootstrap primary) */
+.btn-primary {
+    background-color: var(--morado);
+    border-color: var(--morado);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--morado-claro);
+    border-color: var(--morado-claro);
+}
+
+.btn-outline-primary {
+    color: var(--morado);
+    border-color: var(--morado);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary.active {
+    background-color: var(--morado-claro);
+    border-color: var(--morado-claro);
+    color: #FFFFFF;
+}
+
+/* Encabezados de tabla */
+.table thead {
+    background-color: var(--gris);
+    color: #FFFFFF;
+}
+
+/* Tarjetas del dashboard */
+.card-stat {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-stat-morado {
+    background-color: var(--morado);
+    color: #FFFFFF;
+}
+
+.card-stat-morado-claro {
+    background-color: var(--morado-claro);
+    color: #FFFFFF;
+}
+
+.card-stat .text-white-50 {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Pestañas de Reportes */
+.nav-tabs .nav-link.active {
+    background-color: var(--morado);
+    color: #FFFFFF;
+    border-color: var(--morado);
+}
+
+.nav-tabs .nav-link {
+    color: var(--gris);
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--morado-claro);
+    color: var(--morado);
+}
+
+/* Badges de estado (activo/vencido/pendiente, etc.) */
+.badge-activo { background-color: #198754; }
+.badge-vencido { background-color: #dc3545; }
+.badge-pendiente { background-color: #ffc107; color: #000; }
+.badge-pagada { background-color: var(--morado); }

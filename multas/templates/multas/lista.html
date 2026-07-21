@@ -3,14 +3,6 @@
 {% block content %}
 <h2 class="mb-4"><i class="bi bi-cash-coin"></i> Multas</h2>
 
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}" role="alert">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endif %}
-
 <div class="card mb-4">
   <div class="card-header">Registrar pago de multa</div>
   <div class="card-body">
@@ -88,7 +80,7 @@
             <td>{{ multa.id_tipo_multa.descripcion }}</td>
             <td>{{ multa.id_devolucion.dias_atraso }}</td>
             <td>${{ multa.monto }}</td>
-            <td><span class="badge bg-warning text-dark">{{ multa.id_estado.codigo }}</span></td>
+            <td><span class="badge badge-pendiente">{{ multa.id_estado.codigo }}</span></td>
           </tr>
         {% empty %}
           <tr>

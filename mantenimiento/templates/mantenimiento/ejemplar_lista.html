@@ -24,7 +24,13 @@
         <td>{{ ejemplar.id_libro.titulo_libro }}</td>
         <td>{{ ejemplar.numero_serie }}</td>
         <td>{{ ejemplar.fecha_adquisicion }}</td>
-        <td><span class="badge bg-secondary">{{ ejemplar.id_estado.codigo }}</span></td>
+        <td>
+          {% if ejemplar.id_estado.codigo == 'disponible' %}
+            <span class="badge badge-activo">{{ ejemplar.id_estado.codigo }}</span>
+          {% else %}
+            <span class="badge badge-pendiente">{{ ejemplar.id_estado.codigo }}</span>
+          {% endif %}
+        </td>
         <td>
           <a href="{% url 'mantenimiento:ejemplar_editar' ejemplar.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
           <a href="{% url 'mantenimiento:ejemplar_eliminar' ejemplar.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>

@@ -3,14 +3,6 @@
 {% block content %}
 <h2 class="mb-4"><i class="bi bi-calendar-check"></i> Reservas</h2>
 
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}" role="alert">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endif %}
-
 <div class="card mb-4">
   <div class="card-header">Registrar nueva reserva</div>
   <div class="card-body">
@@ -69,9 +61,9 @@
             <td>{{ reserva.fecha_vencimiento }}</td>
             <td>
               {% if reserva.estado_calculado == 'activa' %}
-                <span class="badge bg-success">activa</span>
+                <span class="badge badge-activo">activa</span>
               {% else %}
-                <span class="badge bg-secondary">vencida</span>
+                <span class="badge badge-vencido">vencida</span>
               {% endif %}
             </td>
           </tr>

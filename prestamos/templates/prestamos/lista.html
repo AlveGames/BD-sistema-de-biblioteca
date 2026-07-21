@@ -3,14 +3,6 @@
 {% block content %}
 <h2 class="mb-4"><i class="bi bi-journal-bookmark"></i> Préstamos</h2>
 
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}" role="alert">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endif %}
-
 <div class="card mb-4">
   <div class="card-header">Registrar nuevo préstamo</div>
   <div class="card-body">
@@ -83,7 +75,7 @@
             <td>{{ prestamo.id_bibliotecario.nombre }} {{ prestamo.id_bibliotecario.apellido }}</td>
             <td>{{ prestamo.fecha_prestamo }}</td>
             <td>{{ prestamo.fecha_devolucion_esperada }}</td>
-            <td><span class="badge bg-success">{{ prestamo.id_estado.codigo }}</span></td>
+            <td><span class="badge badge-activo">{{ prestamo.id_estado.codigo }}</span></td>
           </tr>
         {% empty %}
           <tr>

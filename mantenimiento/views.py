@@ -1,3 +1,6 @@
+from django.contrib import messages
+from django.db import IntegrityError
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
@@ -9,6 +12,21 @@ from .forms import AutorForm, BibliotecarioForm, EjemplarForm, LibroForm, Usuari
 
 def index(request):
     return render(request, 'mantenimiento/index.html')
+
+
+class ProtegerEliminacionMixin:
+    """Evita el error 500 cuando la fila tiene registros relacionados (FK con ON DELETE NO ACTION en SQL Server)."""
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            messages.error(
+                self.request,
+                "No se puede eliminar: tiene registros relacionados (préstamos, reservas, "
+                "multas, etc.). Elimina o reasigna esos registros primero.",
+            )
+            return HttpResponseRedirect(self.get_success_url())
 
 
 # ---------- Usuario ----------
@@ -35,7 +53,7 @@ class UsuarioUpdateView(UpdateView):
     extra_context = {'titulo': 'Editar usuario', 'url_cancelar': 'mantenimiento:usuario_lista'}
 
 
-class UsuarioDeleteView(DeleteView):
+class UsuarioDeleteView(ProtegerEliminacionMixin, DeleteView):
     model = MUsuario
     template_name = 'mantenimiento/confirm_delete_generico.html'
     success_url = reverse_lazy('mantenimiento:usuario_lista')
@@ -71,7 +89,7 @@ class AutorUpdateView(UpdateView):
     extra_context = {'titulo': 'Editar autor', 'url_cancelar': 'mantenimiento:autor_lista'}
 
 
-class AutorDeleteView(DeleteView):
+class AutorDeleteView(ProtegerEliminacionMixin, DeleteView):
     model = MAutor
     template_name = 'mantenimiento/confirm_delete_generico.html'
     success_url = reverse_lazy('mantenimiento:autor_lista')
@@ -107,7 +125,7 @@ class BibliotecarioUpdateView(UpdateView):
     extra_context = {'titulo': 'Editar bibliotecario', 'url_cancelar': 'mantenimiento:bibliotecario_lista'}
 
 
-class BibliotecarioDeleteView(DeleteView):
+class BibliotecarioDeleteView(ProtegerEliminacionMixin, DeleteView):
     model = MBibliotecario
     template_name = 'mantenimiento/confirm_delete_generico.html'
     success_url = reverse_lazy('mantenimiento:bibliotecario_lista')
@@ -155,7 +173,7 @@ class LibroUpdateView(LibroAutoresMixin, UpdateView):
     extra_context = {'titulo': 'Editar libro', 'url_cancelar': 'mantenimiento:libro_lista'}
 
 
-class LibroDeleteView(DeleteView):
+class LibroDeleteView(ProtegerEliminacionMixin, DeleteView):
     model = MLibro
     template_name = 'mantenimiento/confirm_delete_generico.html'
     success_url = reverse_lazy('mantenimiento:libro_lista')
@@ -194,7 +212,7 @@ class EjemplarUpdateView(UpdateView):
     extra_context = {'titulo': 'Editar ejemplar', 'url_cancelar': 'mantenimiento:ejemplar_lista'}
 
 
-class EjemplarDeleteView(DeleteView):
+class EjemplarDeleteView(ProtegerEliminacionMixin, DeleteView):
     model = MEjemplar
     template_name = 'mantenimiento/confirm_delete_generico.html'
     success_url = reverse_lazy('mantenimiento:ejemplar_lista')
