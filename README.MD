@@ -1,6 +1,6 @@
 ## Cómo restaurar la base de datos
 
-1. Descarga el archivo `.bak` desde este link: [pega aquí tu link de Drive]
+1. Descarga el archivo `.bak` desde este link: [pega aquí tu link de Drive](el link es privado asi que el que quiera copiar esto.. jodase)
 2. Abre SQL Server Management Studio (SSMS)
 3. Clic derecho en "Bases de datos" → Restaurar base de datos...
 4. Selecciona "Dispositivo" → busca el archivo .bak descargado
