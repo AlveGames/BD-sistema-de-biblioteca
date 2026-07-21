@@ -53,3 +53,27 @@ def registrar_pago(multa_id, monto_pagado, metodo_pago_id, bibliotecario_id):
             multa.save(update_fields=['id_estado'])
 
         return pago
+
+
+def anular_multa(multa_id):
+    """Marca una multa pendiente como anulada.
+
+    Nota: TMulta no tiene ninguna columna para guardar un motivo de anulación
+    (solo id_multa, id_devolucion, id_tipo_multa, monto, id_estado). No se agregó
+    una columna nueva para esto -tocaría el esquema ya validado-, así que el motivo
+    que capture la pantalla no se persiste en ningún lado todavía.
+    """
+    with transaction.atomic():
+        try:
+            multa = TMulta.objects.select_related('id_estado').get(pk=multa_id)
+        except TMulta.DoesNotExist:
+            raise ValidationError("La multa indicada no existe.")
+
+        if multa.id_estado.codigo != 'pendiente':
+            raise ValidationError(
+                f"La multa ya está en estado '{multa.id_estado.codigo}', no se puede anular."
+            )
+
+        estado_anulada = PEstado.objects.get(entidad='MULTA', codigo='anulada')
+        multa.id_estado = estado_anulada
+        multa.save(update_fields=['id_estado'])

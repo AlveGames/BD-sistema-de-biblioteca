@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Inicio — Biblioteca Universitaria{% endblock %}
 {% block content %}
-<h2 class="mb-4">Panel de control — Biblioteca UNEMI</h2>
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Panel de control — Biblioteca UNEMI</h2>
 
 {% if multas_pendientes.cantidad > 0 %}
   <div class="alert alert-warning" role="alert">
@@ -14,33 +14,33 @@
   <div class="col">
     <div class="card card-stat card-stat-morado h-100">
       <div class="card-body">
-        <div class="text-white-50 small"><i class="bi bi-journal-bookmark"></i> Préstamos activos</div>
-        <div class="fs-2 fw-bold">{{ prestamos_activos }}</div>
+        <div class="etiqueta text-white-50"><i class="bi bi-journal-bookmark"></i> Préstamos activos</div>
+        <div class="valor">{{ prestamos_activos }}</div>
       </div>
     </div>
   </div>
   <div class="col">
     <div class="card card-stat card-stat-morado-claro h-100">
       <div class="card-body">
-        <div class="text-white-50 small"><i class="bi bi-calendar-check"></i> Reservas activas</div>
-        <div class="fs-2 fw-bold">{{ reservas_activas }}</div>
+        <div class="etiqueta text-white-50"><i class="bi bi-calendar-check"></i> Reservas activas</div>
+        <div class="valor">{{ reservas_activas }}</div>
       </div>
     </div>
   </div>
   <div class="col">
     <div class="card card-stat card-stat-morado h-100">
       <div class="card-body">
-        <div class="text-white-50 small"><i class="bi bi-cash-coin"></i> Multas pendientes</div>
-        <div class="fs-2 fw-bold">{{ multas_pendientes.cantidad }}</div>
-        <div class="text-white-50 small">${{ multas_pendientes.total }}</div>
+        <div class="etiqueta text-white-50"><i class="bi bi-cash-coin"></i> Multas pendientes</div>
+        <div class="valor">{{ multas_pendientes.cantidad }}</div>
+        <div class="etiqueta text-white-50">${{ multas_pendientes.total }}</div>
       </div>
     </div>
   </div>
   <div class="col">
     <div class="card card-stat card-stat-morado-claro h-100">
       <div class="card-body">
-        <div class="text-white-50 small"><i class="bi bi-collection"></i> Ejemplares disponibles</div>
-        <div class="fs-2 fw-bold">{{ ejemplares_disponibles }}</div>
+        <div class="etiqueta text-white-50"><i class="bi bi-collection"></i> Ejemplares disponibles</div>
+        <div class="valor">{{ ejemplares_disponibles }}</div>
       </div>
     </div>
   </div>

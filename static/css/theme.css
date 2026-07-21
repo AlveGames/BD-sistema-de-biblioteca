@@ -145,3 +145,120 @@ body {
 .badge-vencido { background-color: #dc3545; }
 .badge-pendiente { background-color: #ffc107; color: #000; }
 .badge-pagada { background-color: var(--morado); }
+.badge-anulada { background-color: #6c757d; }
+.badge-cancelada { background-color: #6c757d; }
+.badge-convertida { background-color: #0dcaf0; color: #000; }
+
+/* ===== Refinamiento visual (pulido tipo dashboard SaaS) ===== */
+
+/* Tipografía y espaciado general */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.content {
+    padding: 30px 40px;
+}
+
+h1, h2, h3 {
+    font-weight: 700;
+}
+
+/* Tarjetas con bordes redondeados y sombra suave (contenedores de formularios,
+   tablas, y bloques generales). Se excluye .card-stat para que su color de
+   fondo (morado/morado-claro) no quede pisado por el blanco genérico: ambas
+   reglas tienen la misma especificidad y esta se declara después en el archivo,
+   así que sin el :not() ganaría por orden de cascada. */
+.card:not(.card-stat), .panel-seccion {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 24px;
+    margin-bottom: 24px;
+    background-color: #FFFFFF;
+}
+
+/* Sidebar más pulido: iconos alineados, más padding, esquinas redondeadas
+   en el link activo */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 4px 12px;
+    transition: background-color 0.15s ease;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+    background-color: var(--morado);
+    border-radius: 8px;
+}
+
+/* Tablas más limpias: sin bordes duros, filas alternadas sutiles,
+   más padding vertical */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    border: none;
+    padding: 14px 16px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.table tbody td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.table tbody tr:hover {
+    background-color: #FAF8FF;
+}
+
+/* Badges tipo "pill" redondeados para estados */
+.badge {
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+/* Botones con esquinas más suaves */
+.btn {
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-weight: 600;
+}
+
+/* Inputs y selects con mejor acabado */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #E0E0E0;
+    padding: 10px 14px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--morado);
+    box-shadow: 0 0 0 3px rgba(74,0,224,0.1);
+}
+
+/* Tarjetas de estadísticas del dashboard: más grandes, mejor tipografía */
+.card-stat {
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.card-stat .valor {
+    font-size: 2.2rem;
+    font-weight: 800;
+}
+
+.card-stat .etiqueta {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}

@@ -49,6 +49,7 @@
           <th>Fecha reserva</th>
           <th>Vence (48h)</th>
           <th>Estado</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -66,14 +67,73 @@
                 <span class="badge badge-vencido">vencida</span>
               {% endif %}
             </td>
+            <td>
+              {% if reserva.estado_calculado == 'activa' %}
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalConvertir{{ reserva.id_reserva }}">
+                    Convertir a Préstamo
+                  </button>
+                  <form method="post" action="{% url 'reservas:cancelar' reserva.id_reserva %}" onsubmit="return confirm('¿Cancelar esta reserva?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                  </form>
+                </div>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="6" class="text-center text-muted">No hay reservas activas.</td>
+            <td colspan="7" class="text-center text-muted">No hay reservas activas.</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+
+{% for reserva in reservas_activas %}
+  {% if reserva.estado_calculado == 'activa' %}
+    <div class="modal fade" id="modalConvertir{{ reserva.id_reserva }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="post" action="{% url 'reservas:convertir_reserva' reserva.id_reserva %}">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">Convertir reserva a préstamo</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-3">
+                <strong>{{ reserva.id_libro.titulo_libro }}</strong><br>
+                Usuario: {{ reserva.id_usuario.nombres }} {{ reserva.id_usuario.apellidos }}
+              </p>
+
+              <label for="ejemplar-{{ reserva.id_reserva }}" class="form-label">Ejemplar disponible</label>
+              <select name="ejemplar" id="ejemplar-{{ reserva.id_reserva }}" class="form-select mb-3" required>
+                <option value="" disabled selected>Seleccione un ejemplar</option>
+                {% for ejemplar in reserva.ejemplares_disponibles %}
+                  <option value="{{ ejemplar.id_ejemplar }}">Serie {{ ejemplar.numero_serie }}</option>
+                {% empty %}
+                  <option value="" disabled>No hay ejemplares disponibles de este libro</option>
+                {% endfor %}
+              </select>
+
+              <label for="bibliotecario-{{ reserva.id_reserva }}" class="form-label">Bibliotecario</label>
+              <select name="bibliotecario" id="bibliotecario-{{ reserva.id_reserva }}" class="form-select" required>
+                <option value="" disabled selected>Seleccione un bibliotecario</option>
+                {% for bibliotecario in bibliotecarios %}
+                  <option value="{{ bibliotecario.id_bibliotecario }}">{{ bibliotecario.nombre }} {{ bibliotecario.apellido }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Confirmar conversión</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}
 {% endblock %}

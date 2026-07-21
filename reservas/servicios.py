@@ -1,9 +1,11 @@
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils import timezone
 
-from prestamos.models import TDetallePrestamo, TMulta, TReserva
+from prestamos.models import MEjemplar, PEstado, TDetallePrestamo, TMulta, TPrestamo, TReserva
+from prestamos.servicios import calcular_fecha_devolucion_esperada, validar_nuevo_prestamo
 
 MAX_RESERVAS_ACTIVAS = 2
 PLAZO_HORAS_RESERVA = 48
@@ -67,3 +69,68 @@ def validar_nueva_reserva(usuario_id, libro_id):
 
     if tiene_prestamo_activo_mismo_libro:
         raise ValidationError("El usuario ya tiene un ejemplar de este libro prestado actualmente.")
+
+
+def convertir_a_prestamo(reserva_id, ejemplar_id, bibliotecario_id):
+    """Convierte una reserva vigente en un préstamo. Reutiliza validar_nuevo_prestamo
+    (prestamos/servicios.py) para no duplicar las reglas de máximo de ejemplares,
+    préstamos vencidos y multas pendientes."""
+    with transaction.atomic():
+        try:
+            reserva = TReserva.objects.select_related('id_usuario', 'id_libro', 'id_estado').get(pk=reserva_id)
+        except TReserva.DoesNotExist:
+            raise ValidationError("La reserva indicada no existe.")
+
+        if calcular_estado_real(reserva) != 'activa':
+            raise ValidationError("Esta reserva ya no está activa, no se puede convertir a préstamo.")
+
+        if not ejemplar_id:
+            raise ValidationError("Debe seleccionar un ejemplar disponible del libro reservado.")
+
+        if not bibliotecario_id:
+            raise ValidationError("Debe seleccionar un bibliotecario.")
+
+        estado_ejemplar_disponible = PEstado.objects.get(entidad='EJEMPLAR', codigo='disponible')
+        try:
+            ejemplar = MEjemplar.objects.get(
+                pk=ejemplar_id, id_libro_id=reserva.id_libro_id, id_estado=estado_ejemplar_disponible
+            )
+        except MEjemplar.DoesNotExist:
+            raise ValidationError(
+                "El ejemplar seleccionado no corresponde al libro reservado o ya no está disponible."
+            )
+
+        validar_nuevo_prestamo(reserva.id_usuario_id, [ejemplar_id])
+
+        estado_prestamo_activo = PEstado.objects.get(entidad='PRESTAMO', codigo='activo')
+        estado_ejemplar_prestado = PEstado.objects.get(entidad='EJEMPLAR', codigo='prestado')
+        estado_reserva_convertida = PEstado.objects.get(entidad='RESERVA', codigo='convertida')
+
+        fecha_prestamo = timezone.now().date()
+        prestamo = TPrestamo.objects.create(
+            id_usuario=reserva.id_usuario,
+            id_bibliotecario_id=bibliotecario_id,
+            id_reserva=reserva,
+            fecha_prestamo=fecha_prestamo,
+            fecha_devolucion_esperada=calcular_fecha_devolucion_esperada(fecha_prestamo),
+            id_estado=estado_prestamo_activo,
+        )
+        TDetallePrestamo.objects.create(id_prestamo=prestamo, id_ejemplar=ejemplar)
+        MEjemplar.objects.filter(pk=ejemplar.pk).update(id_estado=estado_ejemplar_prestado)
+        TReserva.objects.filter(pk=reserva.pk).update(id_estado=estado_reserva_convertida)
+
+        return prestamo
+
+
+def cancelar_reserva(reserva_id):
+    """Cancela una reserva vigente. Acción directa, sin validaciones adicionales."""
+    try:
+        reserva = TReserva.objects.select_related('id_estado').get(pk=reserva_id)
+    except TReserva.DoesNotExist:
+        raise ValidationError("La reserva indicada no existe.")
+
+    if calcular_estado_real(reserva) != 'activa':
+        raise ValidationError("Solo se pueden cancelar reservas activas.")
+
+    estado_cancelada = PEstado.objects.get(entidad='RESERVA', codigo='cancelada')
+    TReserva.objects.filter(pk=reserva.pk).update(id_estado=estado_cancelada)

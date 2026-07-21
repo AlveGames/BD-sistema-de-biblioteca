@@ -2,41 +2,45 @@
 {% block title %}Libros — Biblioteca Universitaria{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="mb-0">Libros</h2>
+  <h2 class="mb-0"><i class="bi bi-book"></i> Libros</h2>
   <a href="{% url 'mantenimiento:libro_crear' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nuevo libro</a>
 </div>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Título</th>
-      <th>ISBN</th>
-      <th>Categoría</th>
-      <th>Precio</th>
-      <th>Autores</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for libro in object_list %}
-      <tr>
-        <td>{{ libro.id_libro }}</td>
-        <td>{{ libro.titulo_libro }}</td>
-        <td>{{ libro.isbn }}</td>
-        <td>{{ libro.id_categoria.nombre }}</td>
-        <td>${{ libro.precio }}</td>
-        <td>
-          {% for ra in libro.rlibroautor_set.all %}{{ ra.id_autor.nombre_autor }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
-        </td>
-        <td>
-          <a href="{% url 'mantenimiento:libro_editar' libro.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-          <a href="{% url 'mantenimiento:libro_eliminar' libro.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="7" class="text-center text-muted">No hay libros registrados.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Título</th>
+          <th>ISBN</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Autores</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for libro in object_list %}
+          <tr>
+            <td>{{ libro.id_libro }}</td>
+            <td>{{ libro.titulo_libro }}</td>
+            <td>{{ libro.isbn }}</td>
+            <td>{{ libro.id_categoria.nombre }}</td>
+            <td>${{ libro.precio }}</td>
+            <td>
+              {% for ra in libro.rlibroautor_set.all %}{{ ra.id_autor.nombre_autor }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+            </td>
+            <td>
+              <a href="{% url 'mantenimiento:libro_editar' libro.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+              <a href="{% url 'mantenimiento:libro_eliminar' libro.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center text-muted">No hay libros registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

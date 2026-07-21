@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 
 from prestamos.models import MBibliotecario, PMetodoPago, TMulta
 
-from .servicios import registrar_pago
+from .servicios import anular_multa, registrar_pago
 
 
 def lista(request):
@@ -43,3 +43,16 @@ def lista(request):
         'bibliotecarios': bibliotecarios,
         'metodos_pago': metodos_pago,
     })
+
+
+def anular(request, id_multa):
+    if request.method == 'POST':
+        try:
+            anular_multa(id_multa)
+            messages.success(request, "Multa anulada correctamente.")
+        except ValidationError as e:
+            messages.error(request, ' '.join(e.messages))
+        except Exception as e:
+            messages.error(request, f"Error al anular la multa: {e}")
+
+    return redirect('multas:lista')

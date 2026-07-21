@@ -4,9 +4,15 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
-from prestamos.models import MLibro, MUsuario, PEstado, TReserva
+from prestamos.models import MBibliotecario, MEjemplar, MLibro, MUsuario, PEstado, TReserva
 
-from .servicios import calcular_estado_real, calcular_fecha_vencimiento, validar_nueva_reserva
+from .servicios import (
+    calcular_estado_real,
+    calcular_fecha_vencimiento,
+    cancelar_reserva,
+    convertir_a_prestamo,
+    validar_nueva_reserva,
+)
 
 
 def lista(request):
@@ -41,16 +47,52 @@ def lista(request):
 
     usuarios = MUsuario.objects.all().order_by('apellidos', 'nombres')
     libros = MLibro.objects.all().order_by('titulo_libro')
+    bibliotecarios = MBibliotecario.objects.all().order_by('apellido', 'nombre')
 
     reservas_activas = TReserva.objects.filter(
         id_estado__codigo='activa'
     ).select_related('id_usuario', 'id_libro', 'id_estado').order_by('-fecha_reserva')
 
+    estado_ejemplar_disponible = PEstado.objects.get(entidad='EJEMPLAR', codigo='disponible')
+
     for reserva in reservas_activas:
         reserva.estado_calculado = calcular_estado_real(reserva)
+        if reserva.estado_calculado == 'activa':
+            reserva.ejemplares_disponibles = MEjemplar.objects.filter(
+                id_libro_id=reserva.id_libro_id, id_estado=estado_ejemplar_disponible
+            )
 
     return render(request, 'reservas/lista.html', {
         'usuarios': usuarios,
         'libros': libros,
+        'bibliotecarios': bibliotecarios,
         'reservas_activas': reservas_activas,
     })
+
+
+def convertir_reserva(request, id_reserva):
+    if request.method == 'POST':
+        ejemplar_id = request.POST.get('ejemplar')
+        bibliotecario_id = request.POST.get('bibliotecario')
+        try:
+            convertir_a_prestamo(id_reserva, ejemplar_id, bibliotecario_id)
+            messages.success(request, "Reserva convertida a préstamo correctamente.")
+        except ValidationError as e:
+            messages.error(request, ' '.join(e.messages))
+        except Exception as e:
+            messages.error(request, f"Error al convertir la reserva: {e}")
+
+    return redirect('reservas:lista')
+
+
+def cancelar(request, id_reserva):
+    if request.method == 'POST':
+        try:
+            cancelar_reserva(id_reserva)
+            messages.success(request, "Reserva cancelada correctamente.")
+        except ValidationError as e:
+            messages.error(request, ' '.join(e.messages))
+        except Exception as e:
+            messages.error(request, f"Error al cancelar la reserva: {e}")
+
+    return redirect('reservas:lista')

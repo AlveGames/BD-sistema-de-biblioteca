@@ -67,6 +67,7 @@
           <th>Días de atraso</th>
           <th>Monto</th>
           <th>Estado</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -81,10 +82,18 @@
             <td>{{ multa.id_devolucion.dias_atraso }}</td>
             <td>${{ multa.monto }}</td>
             <td><span class="badge badge-pendiente">{{ multa.id_estado.codigo }}</span></td>
+            <td>
+              {% if multa.id_estado.codigo == 'pendiente' %}
+                <form method="post" action="{% url 'multas:anular' multa.id_multa %}" onsubmit="return confirm('¿Anular esta multa? Esta acción no se puede deshacer.');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Anular</button>
+                </form>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="6" class="text-center text-muted">No hay multas pendientes.</td>
+            <td colspan="7" class="text-center text-muted">No hay multas pendientes.</td>
           </tr>
         {% endfor %}
       </tbody>

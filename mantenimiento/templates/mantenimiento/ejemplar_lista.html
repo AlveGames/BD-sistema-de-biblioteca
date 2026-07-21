@@ -2,43 +2,47 @@
 {% block title %}Ejemplares — Biblioteca Universitaria{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="mb-0">Ejemplares</h2>
+  <h2 class="mb-0"><i class="bi bi-collection"></i> Ejemplares</h2>
   <a href="{% url 'mantenimiento:ejemplar_crear' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nuevo ejemplar</a>
 </div>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Libro</th>
-      <th>N° de serie</th>
-      <th>Fecha adquisición</th>
-      <th>Estado</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for ejemplar in object_list %}
-      <tr>
-        <td>{{ ejemplar.id_ejemplar }}</td>
-        <td>{{ ejemplar.id_libro.titulo_libro }}</td>
-        <td>{{ ejemplar.numero_serie }}</td>
-        <td>{{ ejemplar.fecha_adquisicion }}</td>
-        <td>
-          {% if ejemplar.id_estado.codigo == 'disponible' %}
-            <span class="badge badge-activo">{{ ejemplar.id_estado.codigo }}</span>
-          {% else %}
-            <span class="badge badge-pendiente">{{ ejemplar.id_estado.codigo }}</span>
-          {% endif %}
-        </td>
-        <td>
-          <a href="{% url 'mantenimiento:ejemplar_editar' ejemplar.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-          <a href="{% url 'mantenimiento:ejemplar_eliminar' ejemplar.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="6" class="text-center text-muted">No hay ejemplares registrados.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Libro</th>
+          <th>N° de serie</th>
+          <th>Fecha adquisición</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ejemplar in object_list %}
+          <tr>
+            <td>{{ ejemplar.id_ejemplar }}</td>
+            <td>{{ ejemplar.id_libro.titulo_libro }}</td>
+            <td>{{ ejemplar.numero_serie }}</td>
+            <td>{{ ejemplar.fecha_adquisicion }}</td>
+            <td>
+              {% if ejemplar.id_estado.codigo == 'disponible' %}
+                <span class="badge badge-activo">{{ ejemplar.id_estado.codigo }}</span>
+              {% else %}
+                <span class="badge badge-pendiente">{{ ejemplar.id_estado.codigo }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'mantenimiento:ejemplar_editar' ejemplar.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+              <a href="{% url 'mantenimiento:ejemplar_eliminar' ejemplar.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-muted">No hay ejemplares registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
