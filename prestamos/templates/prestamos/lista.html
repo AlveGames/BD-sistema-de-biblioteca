@@ -54,36 +54,81 @@
 </div>
 
 <div class="card">
-  <div class="card-header">Préstamos activos</div>
+  <div class="card-header">Préstamos pendientes de devolución</div>
   <div class="card-body p-0">
     <table class="table table-striped mb-0">
       <thead>
         <tr>
           <th>#</th>
           <th>Usuario</th>
-          <th>Bibliotecario</th>
+          <th>Libro / Ejemplar</th>
           <th>Fecha préstamo</th>
           <th>Devolución esperada</th>
           <th>Estado</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
-        {% for prestamo in prestamos_activos %}
+        {% for detalle in detalles_pendientes %}
           <tr>
-            <td>{{ prestamo.id_prestamo }}</td>
-            <td>{{ prestamo.id_usuario.nombres }} {{ prestamo.id_usuario.apellidos }}</td>
-            <td>{{ prestamo.id_bibliotecario.nombre }} {{ prestamo.id_bibliotecario.apellido }}</td>
-            <td>{{ prestamo.fecha_prestamo }}</td>
-            <td>{{ prestamo.fecha_devolucion_esperada }}</td>
-            <td><span class="badge badge-activo">{{ prestamo.id_estado.codigo }}</span></td>
+            <td>{{ detalle.id_prestamo.id_prestamo }}</td>
+            <td>{{ detalle.id_prestamo.id_usuario.nombres }} {{ detalle.id_prestamo.id_usuario.apellidos }}</td>
+            <td>{{ detalle.id_ejemplar.id_libro.titulo_libro }} — serie {{ detalle.id_ejemplar.numero_serie }}</td>
+            <td>{{ detalle.id_prestamo.fecha_prestamo }}</td>
+            <td>{{ detalle.id_prestamo.fecha_devolucion_esperada }}</td>
+            <td>
+              {% if detalle.id_prestamo.id_estado.codigo == 'vencido' %}
+                <span class="badge badge-vencido">vencido</span>
+              {% else %}
+                <span class="badge badge-activo">activo</span>
+              {% endif %}
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucion{{ detalle.id_detalle }}">
+                Registrar Devolución
+              </button>
+            </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="6" class="text-center text-muted">No hay préstamos activos.</td>
+            <td colspan="7" class="text-center text-muted">No hay préstamos pendientes de devolución.</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+
+{% for detalle in detalles_pendientes %}
+  <div class="modal fade" id="modalDevolucion{{ detalle.id_detalle }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="post" action="{% url 'prestamos:registrar_devolucion' detalle.id_detalle %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Registrar devolución</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-3">
+              <strong>{{ detalle.id_ejemplar.id_libro.titulo_libro }}</strong> — serie {{ detalle.id_ejemplar.numero_serie }}<br>
+              Usuario: {{ detalle.id_prestamo.id_usuario.nombres }} {{ detalle.id_prestamo.id_usuario.apellidos }}
+            </p>
+            <label for="condicion-{{ detalle.id_detalle }}" class="form-label">Condición del ejemplar</label>
+            <select name="condicion" id="condicion-{{ detalle.id_detalle }}" class="form-select" required>
+              <option value="" disabled selected>Seleccione una condición</option>
+              {% for condicion in condiciones_ejemplar %}
+                <option value="{{ condicion.id_estado }}">{{ condicion.codigo|capfirst }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar devolución</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endfor %}
 {% endblock %}
