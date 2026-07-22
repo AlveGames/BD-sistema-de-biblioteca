@@ -15,6 +15,9 @@ class MAutor(models.Model):
     bibliografia = models.CharField(max_length=500, db_collation='Modern_Spanish_CI_AS', blank=True, null=True)
     id_nacionalidad = models.ForeignKey('PNacionalidad', models.DO_NOTHING, db_column='id_nacionalidad')
 
+    def __str__(self):
+        return self.nombre_autor
+
     class Meta:
         managed = False
         db_table = 'M_AUTOR'
@@ -29,6 +32,9 @@ class MBibliotecario(models.Model):
     fecha_contratacion = models.DateField()
     estado = models.CharField(max_length=20, db_collation='Modern_Spanish_CI_AS')
 
+    def __str__(self):
+        return f"{self.nombre} {self.apellido}"
+
     class Meta:
         managed = False
         db_table = 'M_BIBLIOTECARIO'
@@ -40,6 +46,9 @@ class MEjemplar(models.Model):
     id_estado = models.ForeignKey('PEstado', models.DO_NOTHING, db_column='id_estado')
     fecha_adquisicion = models.DateField()
     numero_serie = models.CharField(unique=True, max_length=30, db_collation='Modern_Spanish_CI_AS')
+
+    def __str__(self):
+        return f"{self.id_libro} — serie {self.numero_serie}"
 
     class Meta:
         managed = False
@@ -53,6 +62,9 @@ class MLibro(models.Model):
     anio_publicacion = models.IntegerField(blank=True, null=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     id_categoria = models.ForeignKey('PCategoria', models.DO_NOTHING, db_column='id_categoria')
+
+    def __str__(self):
+        return self.titulo_libro
 
     class Meta:
         managed = False
@@ -70,6 +82,9 @@ class MUsuario(models.Model):
     telefono = models.CharField(max_length=15, db_collation='Modern_Spanish_CI_AS', blank=True, null=True)
     dni = models.CharField(db_column='DNI', unique=True, max_length=15, db_collation='Modern_Spanish_CI_AS')  # Field name made lowercase.
 
+    def __str__(self):
+        return f"{self.nombres} {self.apellidos}"
+
     class Meta:
         managed = False
         db_table = 'M_USUARIO'
@@ -79,6 +94,9 @@ class PCategoria(models.Model):
     id_categoria = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50, db_collation='Modern_Spanish_CI_AS')
     descripcion = models.CharField(max_length=200, db_collation='Modern_Spanish_CI_AS', blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
 
     class Meta:
         managed = False
@@ -91,6 +109,12 @@ class PEstado(models.Model):
     codigo = models.CharField(max_length=40, db_collation='Modern_Spanish_CI_AS')
     descripcion = models.CharField(max_length=100, db_collation='Modern_Spanish_CI_AS', blank=True, null=True)
 
+    def __str__(self):
+        # Catálogo genérico usado en varios combos (ejemplar, préstamo, reserva,
+        # condición, multa, pago): sin el prefijo de entidad se podría confundir
+        # un código de una entidad con el de otra en el mismo dropdown.
+        return f"{self.entidad}: {self.codigo}"
+
     class Meta:
         managed = False
         db_table = 'P_ESTADO'
@@ -99,6 +123,9 @@ class PEstado(models.Model):
 class PMetodoPago(models.Model):
     id_metodo_pago = models.AutoField(primary_key=True)
     descripcion = models.CharField(max_length=100, db_collation='Modern_Spanish_CI_AS')
+
+    def __str__(self):
+        return self.descripcion
 
     class Meta:
         managed = False
@@ -109,6 +136,9 @@ class PNacionalidad(models.Model):
     id_nacionalidad = models.AutoField(primary_key=True)
     nombre_nacionalidad = models.CharField(max_length=50, db_collation='Modern_Spanish_CI_AS')
 
+    def __str__(self):
+        return self.nombre_nacionalidad
+
     class Meta:
         managed = False
         db_table = 'P_NACIONALIDAD'
@@ -117,6 +147,9 @@ class PNacionalidad(models.Model):
 class PTipoMulta(models.Model):
     id_tipo_multa = models.AutoField(primary_key=True)
     descripcion = models.CharField(max_length=100, db_collation='Modern_Spanish_CI_AS')
+
+    def __str__(self):
+        return self.descripcion
 
     class Meta:
         managed = False
@@ -129,6 +162,9 @@ class RLibroAutor(models.Model):
     id_autor = models.ForeignKey(MAutor, models.DO_NOTHING, db_column='id_autor')
     rol = models.CharField(max_length=40, db_collation='Modern_Spanish_CI_AS', blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.id_libro} — {self.id_autor}"
+
     class Meta:
         managed = False
         db_table = 'R_LIBRO_AUTOR'
@@ -138,6 +174,9 @@ class TDetallePrestamo(models.Model):
     id_detalle = models.AutoField(primary_key=True)
     id_prestamo = models.ForeignKey('TPrestamo', models.DO_NOTHING, db_column='id_prestamo')
     id_ejemplar = models.ForeignKey(MEjemplar, models.DO_NOTHING, db_column='id_ejemplar')
+
+    def __str__(self):
+        return f"Detalle #{self.id_detalle} — {self.id_ejemplar}"
 
     class Meta:
         managed = False
@@ -151,6 +190,9 @@ class TDevolucion(models.Model):
     id_estado = models.ForeignKey(PEstado, models.DO_NOTHING, db_column='id_estado')
     dias_atraso = models.IntegerField()
 
+    def __str__(self):
+        return f"Devolución #{self.id_devolucion} — {self.id_detalle}"
+
     class Meta:
         managed = False
         db_table = 'T_DEVOLUCION'
@@ -162,6 +204,9 @@ class TMulta(models.Model):
     id_tipo_multa = models.ForeignKey(PTipoMulta, models.DO_NOTHING, db_column='id_tipo_multa')
     monto = models.DecimalField(max_digits=8, decimal_places=2)
     id_estado = models.ForeignKey(PEstado, models.DO_NOTHING, db_column='id_estado')
+
+    def __str__(self):
+        return f"Multa #{self.id_multa} — ${self.monto}"
 
     class Meta:
         managed = False
@@ -177,6 +222,9 @@ class TPagoMulta(models.Model):
     monto_pagado = models.DecimalField(max_digits=8, decimal_places=2)
     id_metodo_pago = models.ForeignKey(PMetodoPago, models.DO_NOTHING, db_column='id_metodo_pago')
 
+    def __str__(self):
+        return f"Pago #{self.id_pago} — ${self.monto_pagado} ({self.id_multa})"
+
     class Meta:
         managed = False
         db_table = 'T_PAGO_MULTA'
@@ -191,6 +239,9 @@ class TPrestamo(models.Model):
     id_estado = models.ForeignKey(PEstado, models.DO_NOTHING, db_column='id_estado')
     fecha_devolucion_esperada = models.DateField()
 
+    def __str__(self):
+        return f"Préstamo #{self.id_prestamo} — {self.id_usuario}"
+
     class Meta:
         managed = False
         db_table = 'T_PRESTAMO'
@@ -203,6 +254,9 @@ class TReserva(models.Model):
     fecha_reserva = models.DateTimeField()
     fecha_vencimiento = models.DateField()
     id_estado = models.ForeignKey(PEstado, models.DO_NOTHING, db_column='id_estado')
+
+    def __str__(self):
+        return f"Reserva #{self.id_reserva} — {self.id_libro}"
 
     class Meta:
         managed = False

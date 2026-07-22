@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 
 from prestamos.models import MBibliotecario, PMetodoPago, TMulta
 
-from .servicios import anular_multa, registrar_pago
+from .servicios import anular_multa, calcular_saldo_pendiente, registrar_pago
 
 
 def lista(request):
@@ -15,8 +15,11 @@ def lista(request):
         bibliotecario_id = request.POST.get('bibliotecario')
 
         try:
-            registrar_pago(multa_id, monto_pagado, metodo_pago_id, bibliotecario_id)
-            messages.success(request, "Pago registrado correctamente.")
+            _, saldo_restante = registrar_pago(multa_id, monto_pagado, metodo_pago_id, bibliotecario_id)
+            if saldo_restante <= 0:
+                messages.success(request, "Pago registrado. La multa quedó completamente pagada.")
+            else:
+                messages.success(request, f"Pago parcial registrado. Saldo pendiente: ${saldo_restante}.")
         except ValidationError as e:
             messages.error(request, ' '.join(e.messages))
         except Exception as e:
@@ -37,6 +40,9 @@ def lista(request):
         'id_devolucion__id_detalle__id_prestamo',
         'id_devolucion__id_detalle__id_prestamo__id_usuario',
     ).order_by('id_multa')
+
+    for multa in multas_pendientes:
+        multa.saldo_pendiente = calcular_saldo_pendiente(multa)
 
     return render(request, 'multas/lista.html', {
         'multas_pendientes': multas_pendientes,

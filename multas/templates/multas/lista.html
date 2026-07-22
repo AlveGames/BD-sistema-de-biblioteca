@@ -16,7 +16,7 @@
             {% for multa in multas_pendientes %}
               <option value="{{ multa.id_multa }}">
                 #{{ multa.id_multa }} — {{ multa.id_devolucion.id_detalle.id_prestamo.id_usuario.nombres }}
-                {{ multa.id_devolucion.id_detalle.id_prestamo.id_usuario.apellidos }} — ${{ multa.monto }}
+                {{ multa.id_devolucion.id_detalle.id_prestamo.id_usuario.apellidos }} — saldo ${{ multa.saldo_pendiente }}
               </option>
             {% endfor %}
           </select>
@@ -65,7 +65,7 @@
           <th>Usuario</th>
           <th>Tipo</th>
           <th>Días de atraso</th>
-          <th>Monto</th>
+          <th>Saldo pendiente</th>
           <th>Estado</th>
           <th></th>
         </tr>
@@ -80,7 +80,7 @@
             </td>
             <td>{{ multa.id_tipo_multa.descripcion }}</td>
             <td>{{ multa.id_devolucion.dias_atraso }}</td>
-            <td>${{ multa.monto }}</td>
+            <td>${{ multa.saldo_pendiente }}</td>
             <td><span class="badge badge-pendiente">{{ multa.id_estado.codigo }}</span></td>
             <td>
               {% if multa.id_estado.codigo == 'pendiente' %}

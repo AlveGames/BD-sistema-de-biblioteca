@@ -28,6 +28,19 @@ def calcular_estado_real(reserva):
     return 'activa'
 
 
+def sincronizar_reservas_vencidas():
+    """Actualiza en la base de datos el id_estado de las reservas cuyo
+    estado calculado real es 'vencida' pero el campo guardado sigue
+    diciendo 'activa'. No borra nada, solo corrige el estado persistido."""
+    limite_inferior = timezone.now() - timedelta(hours=PLAZO_HORAS_RESERVA)
+    estado_vencida = PEstado.objects.get(entidad='RESERVA', codigo='vencida')
+
+    TReserva.objects.filter(
+        id_estado__codigo='activa',
+        fecha_reserva__lt=limite_inferior,
+    ).update(id_estado=estado_vencida)
+
+
 def validar_nueva_reserva(usuario_id, libro_id):
     if not libro_id:
         raise ValidationError("Debe seleccionar un libro.")

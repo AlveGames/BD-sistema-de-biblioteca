@@ -61,24 +61,18 @@
             <td>{{ reserva.fecha_reserva }}</td>
             <td>{{ reserva.fecha_vencimiento }}</td>
             <td>
-              {% if reserva.estado_calculado == 'activa' %}
-                <span class="badge badge-activo">activa</span>
-              {% else %}
-                <span class="badge badge-vencido">vencida</span>
-              {% endif %}
+              <span class="badge badge-activo">activa</span>
             </td>
             <td>
-              {% if reserva.estado_calculado == 'activa' %}
-                <div class="d-flex gap-2">
-                  <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalConvertir{{ reserva.id_reserva }}">
-                    Convertir a Préstamo
-                  </button>
-                  <form method="post" action="{% url 'reservas:cancelar' reserva.id_reserva %}" onsubmit="return confirm('¿Cancelar esta reserva?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
-                  </form>
-                </div>
-              {% endif %}
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalConvertir{{ reserva.id_reserva }}">
+                  Convertir a Préstamo
+                </button>
+                <form method="post" action="{% url 'reservas:cancelar' reserva.id_reserva %}" onsubmit="return confirm('¿Cancelar esta reserva?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                </form>
+              </div>
             </td>
           </tr>
         {% empty %}
@@ -92,7 +86,6 @@
 </div>
 
 {% for reserva in reservas_activas %}
-  {% if reserva.estado_calculado == 'activa' %}
     <div class="modal fade" id="modalConvertir{{ reserva.id_reserva }}" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -134,6 +127,5 @@
         </div>
       </div>
     </div>
-  {% endif %}
 {% endfor %}
 {% endblock %}

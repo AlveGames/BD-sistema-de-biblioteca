@@ -12,8 +12,19 @@ MONTO_POR_DIA_ATRASO = Decimal('0.50')
 ESTADOS_MULTA_NO_PAGABLES = ('pagada', 'anulada')
 
 
+def calcular_saldo_pendiente(multa):
+    total_pagado = TPagoMulta.objects.filter(
+        id_multa=multa, id_estado__codigo='confirmado'
+    ).aggregate(total=Sum('monto_pagado'))['total'] or Decimal('0')
+    return multa.monto - total_pagado
+
+
 def registrar_pago(multa_id, monto_pagado, metodo_pago_id, bibliotecario_id):
-    """Registra un TPagoMulta y, si cubre el monto total, marca la multa como 'pagada'."""
+    """Registra un TPagoMulta y, si cubre el saldo pendiente, marca la multa como 'pagada'.
+
+    Devuelve (pago, saldo_pendiente_resultante) para que la vista arme el mensaje
+    ("pagada" vs "pago parcial, saldo $X") sin volver a consultar.
+    """
     try:
         monto_pagado = Decimal(str(monto_pagado))
     except (InvalidOperation, TypeError):
@@ -30,6 +41,16 @@ def registrar_pago(multa_id, monto_pagado, metodo_pago_id, bibliotecario_id):
                 f"La multa ya está en estado '{multa.id_estado.codigo}', no se puede registrar un pago."
             )
 
+        # Una multa puede saldarse en varios abonos: se compara contra lo que
+        # falta ACUMULADO, no contra el monto total original de la multa.
+        saldo_pendiente = calcular_saldo_pendiente(multa)
+
+        if monto_pagado > saldo_pendiente:
+            raise ValidationError(
+                f"El monto pagado (${monto_pagado}) supera el saldo pendiente de la multa "
+                f"(${saldo_pendiente}). No se puede pagar de más."
+            )
+
         estado_pago_confirmado = PEstado.objects.get(entidad='PAGO_MULTA', codigo='confirmado')
 
         pago = TPagoMulta.objects.create(
@@ -41,18 +62,14 @@ def registrar_pago(multa_id, monto_pagado, metodo_pago_id, bibliotecario_id):
             id_metodo_pago_id=metodo_pago_id,
         )
 
-        # Compara lo pagado ACUMULADO (no solo este pago) contra el monto total,
-        # ya que una multa puede saldarse en varios abonos.
-        total_pagado = TPagoMulta.objects.filter(
-            id_multa=multa, id_estado__codigo='confirmado'
-        ).aggregate(total=Sum('monto_pagado'))['total'] or Decimal('0')
+        nuevo_saldo_pendiente = saldo_pendiente - monto_pagado
 
-        if total_pagado >= multa.monto:
+        if nuevo_saldo_pendiente <= 0:
             estado_multa_pagada = PEstado.objects.get(entidad='MULTA', codigo='pagada')
             multa.id_estado = estado_multa_pagada
             multa.save(update_fields=['id_estado'])
 
-        return pago
+        return pago, nuevo_saldo_pendiente
 
 
 def anular_multa(multa_id):

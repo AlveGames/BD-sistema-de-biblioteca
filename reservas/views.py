@@ -7,15 +7,17 @@ from django.utils import timezone
 from prestamos.models import MBibliotecario, MEjemplar, MLibro, MUsuario, PEstado, TReserva
 
 from .servicios import (
-    calcular_estado_real,
     calcular_fecha_vencimiento,
     cancelar_reserva,
     convertir_a_prestamo,
+    sincronizar_reservas_vencidas,
     validar_nueva_reserva,
 )
 
 
 def lista(request):
+    sincronizar_reservas_vencidas()
+
     if request.method == 'POST':
         usuario_id = request.POST.get('usuario')
         libro_id = request.POST.get('libro')
@@ -49,6 +51,9 @@ def lista(request):
     libros = MLibro.objects.all().order_by('titulo_libro')
     bibliotecarios = MBibliotecario.objects.all().order_by('apellido', 'nombre')
 
+    # sincronizar_reservas_vencidas() ya corrió arriba, así que este filtro por el
+    # campo guardado es confiable: toda reserva realmente vencida ya fue corregida
+    # a id_estado='vencida' antes de llegar aquí (no hace falta recalcular por fila).
     reservas_activas = TReserva.objects.filter(
         id_estado__codigo='activa'
     ).select_related('id_usuario', 'id_libro', 'id_estado').order_by('-fecha_reserva')
@@ -56,11 +61,9 @@ def lista(request):
     estado_ejemplar_disponible = PEstado.objects.get(entidad='EJEMPLAR', codigo='disponible')
 
     for reserva in reservas_activas:
-        reserva.estado_calculado = calcular_estado_real(reserva)
-        if reserva.estado_calculado == 'activa':
-            reserva.ejemplares_disponibles = MEjemplar.objects.filter(
-                id_libro_id=reserva.id_libro_id, id_estado=estado_ejemplar_disponible
-            )
+        reserva.ejemplares_disponibles = MEjemplar.objects.filter(
+            id_libro_id=reserva.id_libro_id, id_estado=estado_ejemplar_disponible
+        )
 
     return render(request, 'reservas/lista.html', {
         'usuarios': usuarios,

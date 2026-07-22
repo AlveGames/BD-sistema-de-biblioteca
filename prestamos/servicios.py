@@ -125,7 +125,9 @@ def procesar_devolucion(id_detalle, condicion_id):
             raise Exception("Esta devolución ya fue registrada.")
 
         try:
-            detalle = TDetallePrestamo.objects.select_related('id_prestamo').get(pk=id_detalle)
+            detalle = TDetallePrestamo.objects.select_related(
+                'id_prestamo', 'id_ejemplar__id_libro'
+            ).get(pk=id_detalle)
         except TDetallePrestamo.DoesNotExist:
             raise Exception("El detalle de préstamo indicado no existe.")
 
@@ -160,6 +162,23 @@ def procesar_devolucion(id_detalle, condicion_id):
                 id_devolucion=devolucion,
                 id_tipo_multa=tipo_multa_atraso,
                 monto=Decimal(dias_atraso) * MONTO_MULTA_POR_DIA,
+                id_estado=estado_multa_pendiente,
+            )
+
+        # Multa por condición del ejemplar (independiente de la de atraso: pueden
+        # coexistir ambas para la misma devolución). "bueno"/"regular" no generan
+        # multa adicional aquí.
+        if estado_condicion.codigo in ('dañado', 'perdido'):
+            porcentaje = Decimal('0.50') if estado_condicion.codigo == 'dañado' else Decimal('1.00')
+            precio_libro = detalle.id_ejemplar.id_libro.precio
+            descripcion_tipo = 'Daño de ejemplar' if estado_condicion.codigo == 'dañado' else 'Pérdida de ejemplar'
+
+            tipo_multa = PTipoMulta.objects.get(descripcion=descripcion_tipo)
+            estado_multa_pendiente = PEstado.objects.get(entidad='MULTA', codigo='pendiente')
+            TMulta.objects.create(
+                id_devolucion=devolucion,
+                id_tipo_multa=tipo_multa,
+                monto=(precio_libro * porcentaje).quantize(Decimal('0.01')),
                 id_estado=estado_multa_pendiente,
             )
 
